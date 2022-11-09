@@ -52,3 +52,22 @@ class ChomikujMobile:
         self.has_unlimited_transfer = self.account_balance["HasUnlimitedTransfer"]
         self.points = self.account_balance["Points"]
         self.points_available = self.account_balance["PointsAvailable"]
+
+    def query(self, query_field, page_number, media_type):
+        # Select a proper token, every media type has it's own token
+        if media_type == "All":
+            token = "756c964846148fb2f2922e9e7b8e88e0"
+        elif media_type == "Image":
+            token = "095faede553296bfa3890cca5d7cdefd"
+        elif media_type == "Video":
+            token = "335d046192acdfd847599f5dded58468"
+        elif media_type == "Music":
+            token == "bd0af7a2b10551e3324565582e829124"
+        elif media_type == "Documents":
+            token == "8d15e167b4084708324a5ffa7c315904"
+
+        return self.req_ses.get("https://mobile.chomikuj.pl/api/v3/files/search", params={
+            "Query": query_field,
+            "PageNumber": str(page_number),
+            "MediaType": media_type
+        }, headers={"Token": token}).json()
