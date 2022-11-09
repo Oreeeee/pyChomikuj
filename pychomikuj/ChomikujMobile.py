@@ -10,6 +10,10 @@ class ChomikujMobile:
         self.USER_AGENT = f"android/3.61 ({uuid.uuid4()}; Google Pixel 6)"
 
         self.account_balance = dict()
+        self.transfer = int()
+        self.has_unlimited_transfer = bool()
+        self.points = int()
+        self.points_available = bool()
         self.account_id = int()
         self.account_name = str()
         self.api_key = "0"
@@ -35,10 +39,16 @@ class ChomikujMobile:
                     f"Unknown error! Status code: {login_request.status_code}")
 
         # Update variables
-        self.account_balance = login_request.json()["AccountBalance"]
+        # Reassign API key
+        self.api_key = login_request.json()["ApiKey"]
+        self.req_ses.headers["api-key"] = self.api_key  
+        self.get_account_balance()
         self.account_id = login_request.json()["AccountId"]
         self.account_name = login_request.json()["AccountName"]
-        self.api_key = login_request.json()["ApiKey"]
 
-        # Reassign API key
-        self.req_ses.headers["api-key"] = self.api_key
+    def get_account_balance(self):
+        self.account_balance = self.req_ses.get("https://mobile.chomikuj.pl/api/v3/account/info", headers={"token": "22dbb80e516477793934fa0add1b8929"}).json()
+        self.transfer = self.account_balance["Transfer"]
+        self.has_unlimited_transfer = self.account_balance["HasUnlimitedTransfer"]
+        self.points = self.account_balance["Points"]
+        self.points_available = self.account_balance["PointsAvailable"]
