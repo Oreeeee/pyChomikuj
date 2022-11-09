@@ -1,0 +1,17 @@
+[project]
+name="pychomikuj"
+version="0.1-dev0"
+description="Unofficial Chomikuj.pl API written in Python"
+readme="README.md"
+license={file="LICENSE.txt"}
+classifiers=[
+    "Programming Language :: Python"
+]
+
+dependencies=[
+    "requests"
+]
+
+[project.urls]
+homepage="https://github.com/Oreeeee/pyChomikuj"
+repository="https://github.com/Oreeeee/pyChomikuj"
