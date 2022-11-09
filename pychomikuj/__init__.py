@@ -1,0 +1,1 @@
+from .ChomikujMobile import ChomikujMobile
