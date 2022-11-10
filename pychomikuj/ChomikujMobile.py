@@ -69,7 +69,26 @@ class ChomikujMobile:
         self.points = self.account_balance["Points"]
         self.points_available = self.account_balance["PointsAvailable"]
 
-    def query(self, query_field, page_number, media_type="All", extension=None):
+    def list_directory(self, parent_id=0, page=1, account_id=None):
+        endpoint = "api/v3/folders"
+
+        if account_id == None:
+            additional_endpoint_data = f"?Parent={parent_id}&page={page}"
+            params = {
+                "Parent": str(parent_id),
+                "page": str(page)
+            }
+        else:
+            additional_endpoint_data = f"?AccountId={account_id}&Parent={parent_id}&page={page}"
+            params = {
+                "AccountId": str(account_id),
+                "Parent": str(parent_id),
+                "Page": str(page)
+            }
+
+        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params=params, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)}).json()
+
+    def query(self, query_field, page_number=1, media_type="All", extension=None):
         endpoint = "api/v3/files/search"
 
         query_for_hash = f"{urllib.parse.quote(query_field)}".replace(
