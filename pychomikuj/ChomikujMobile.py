@@ -83,10 +83,36 @@ class ChomikujMobile:
             params = {
                 "AccountId": str(account_id),
                 "Parent": str(parent_id),
-                "Page": str(page)
+                "page": str(page)
             }
 
-        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params=params, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)}).json()
+        list_directory_request = self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params=params, headers={
+                                                  "Token": self.__hash_token(endpoint, additional_endpoint_data)})
+        if list_directory_request.status_code == 401:
+            raise PasswordProtectedDirectoryException(
+                "This directory is password protected!")
+        return list_directory_request.json()
+
+    def authenticate_password(self, account_id, folder_id, password):
+        endpoint = "api/v3/folders/password"
+
+        additional_endpoint_data = r'{"AccountId":"ACC_ID","FolderId":"DIR_ID","Password":"PASSWD"}'
+        additional_endpoint_data = additional_endpoint_data.replace(
+            "ACC_ID", str(account_id))
+        additional_endpoint_data = additional_endpoint_data.replace(
+            "DIR_ID", str(folder_id))
+        additional_endpoint_data = additional_endpoint_data.replace(
+            "PASSWD", password)
+
+        unlock_directory_request = self.req_ses.post(f"{self.API_LOCATION}{endpoint}", json={
+            "AccountId": str(account_id),
+            "FolderId": str(folder_id),
+            "Password": password
+        }, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)})
+
+        if unlock_directory_request.status_code == 401:
+            raise IncorrectDirectoryPasswordException(
+                "Password to this directory is incorrect")
 
     def query(self, query_field, page_number=1, media_type="All", extension=None):
         endpoint = "api/v3/files/search"
