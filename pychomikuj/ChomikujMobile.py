@@ -67,15 +67,24 @@ class ChomikujMobile:
         self.points_available = self.account_balance["PointsAvailable"]
 
     def query(self, query_field, page_number, media_type):
-        query_for_hash = f"{urllib.parse.quote(query_field)}".replace("%20", "+")
-        additional_endpoint_data = f"?Query={query_for_hash}&PageNumber={page_number}&MediaType={media_type}"
         endpoint = "api/v3/files/search"
 
-        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params={
-            "Query": query_field,
-            "PageNumber": str(page_number),
-            "MediaType": media_type
-        }, headers={"Token": self.__hash_token(f"{endpoint}", additional_endpoint_data)}).json()
+        query_for_hash = f"{urllib.parse.quote(query_field)}".replace("%20", "+")
+        if media_type == "Chomiki":
+            additional_endpoint_data = f"?Query={query_for_hash}&PageNumber={page_number}"
+            params = {
+                "Query": query_field,
+                "PageNumber": str(page_number)
+            }
+        else:
+            additional_endpoint_data = f"?Query={query_for_hash}&PageNumber={page_number}&MediaType={media_type}"
+            params = {
+                "Query": query_field,
+                "PageNumber": str(page_number),
+                "MediaType": media_type
+            }
+
+        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params=params, headers={"Token": self.__hash_token(f"{endpoint}", additional_endpoint_data)}).json()
 
     def __hash_token(self, endpoint, additional_endpoint_data=None):
         if additional_endpoint_data == None:
