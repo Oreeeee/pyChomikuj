@@ -1,5 +1,5 @@
 # pyChomikuj
-Chomikuj API written in Python
+(W.I.P) Chomikuj API written in Python
 
 ## TODO:
 - Support for Mobile API (Chomikuj Android)
@@ -12,6 +12,7 @@ This project is in very early development, here is a list of features that work 
 1. Mobile API
 - Logging in
 - Searching for files
+- Listing directories, including password protected ones
 2. Windows API
 - Nothing
 3. Web API
