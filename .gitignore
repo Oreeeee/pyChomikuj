@@ -1,2 +1,6 @@
 # Pycache
 __pycache__/
+
+# Build stuff
+pychomikuj.egg-info/
+dist/
