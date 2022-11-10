@@ -5,11 +5,11 @@ description="Unofficial Chomikuj.pl API written in Python"
 readme="README.md"
 license={file="LICENSE.txt"}
 classifiers=[
-    "Programming Language :: Python"
-    "Development Status :: 3 - Alpha"
-    "Intended Audience :: Developers"
-    "License :: OSI Approved :: The Unlicense (Unlicense)"
-    "Operating System :: OS Independent"
+    "Programming Language :: Python",
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: The Unlicense (Unlicense)",
+    "Operating System :: OS Independent",
     "Topic :: Software Development :: Libraries"
 ]
 
