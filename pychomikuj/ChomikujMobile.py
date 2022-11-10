@@ -11,7 +11,7 @@ class ChomikujMobile:
         # Server throws Error 500 when default user-agent is provided. UUID is used for unique device fingerprinting, here it's randomly generated.
         self.USER_AGENT = f"android/3.61 ({uuid.uuid4()}; Google Pixel 6)"
         self.API_LOCATION = "https://mobile.chomikuj.pl/"
-        self.SALT = "wzrwYua$.DSe8suk!`'2" # String used by Chomikuj to salt MD5
+        self.SALT = "wzrwYua$.DSe8suk!`'2"  # String used by Chomikuj to salt MD5
 
         self.account_balance = dict()
         self.transfer = int()
@@ -31,8 +31,10 @@ class ChomikujMobile:
 
         # Additional data needs to be added for hashing process. This data will be provided
         additional_endpoint_data = r'{"AccountName":"ACC_NAME","Password":"PASSWD"}'
-        additional_endpoint_data = additional_endpoint_data.replace("ACC_NAME", username)
-        additional_endpoint_data = additional_endpoint_data.replace("PASSWD", password)
+        additional_endpoint_data = additional_endpoint_data.replace(
+            "ACC_NAME", username)
+        additional_endpoint_data = additional_endpoint_data.replace(
+            "PASSWD", password)
 
         endpoint = f'api/v3/account/login'
         login_request = self.req_ses.post(f"{self.API_LOCATION}{endpoint}", json={
@@ -52,7 +54,7 @@ class ChomikujMobile:
         # Update variables
         # Reassign API key
         self.api_key = login_request.json()["ApiKey"]
-        self.req_ses.headers["api-key"] = self.api_key  
+        self.req_ses.headers["api-key"] = self.api_key
         self.get_account_balance()
         self.account_id = login_request.json()["AccountId"]
         self.account_name = login_request.json()["AccountName"]
@@ -60,21 +62,31 @@ class ChomikujMobile:
     def get_account_balance(self):
         endpoint = "api/v3/account/info"
 
-        self.account_balance = self.req_ses.get(f"{self.API_LOCATION}{endpoint}", headers={"token": self.__hash_token(endpoint)}).json()
+        self.account_balance = self.req_ses.get(f"{self.API_LOCATION}{endpoint}", headers={
+                                                "token": self.__hash_token(endpoint)}).json()
         self.transfer = self.account_balance["Transfer"]
         self.has_unlimited_transfer = self.account_balance["HasUnlimitedTransfer"]
         self.points = self.account_balance["Points"]
         self.points_available = self.account_balance["PointsAvailable"]
 
-    def query(self, query_field, page_number, media_type):
+    def query(self, query_field, page_number, media_type="All", extension=None):
         endpoint = "api/v3/files/search"
 
-        query_for_hash = f"{urllib.parse.quote(query_field)}".replace("%20", "+")
+        query_for_hash = f"{urllib.parse.quote(query_field)}".replace(
+            "%20", "+")
         if media_type == "Chomiki":
             additional_endpoint_data = f"?Query={query_for_hash}&PageNumber={page_number}"
             params = {
                 "Query": query_field,
                 "PageNumber": str(page_number)
+            }
+        elif extension != None:
+            additional_endpoint_data = f"?Extension={extension}&Query={query_for_hash}&PageNumber={page_number}&MediaType={media_type}"
+            params = {
+                "Extension": extension,
+                "Query": query_field,
+                "PageNumber": str(page_number),
+                "MediaType": media_type
             }
         else:
             additional_endpoint_data = f"?Query={query_for_hash}&PageNumber={page_number}&MediaType={media_type}"
