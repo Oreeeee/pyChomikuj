@@ -158,6 +158,11 @@ class ChomikujMobile:
 
         return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params=params, headers={"Token": self.__hash_token(f"{endpoint}", additional_endpoint_data)}).json()
 
+    def get_friend_list(self, page=1):
+        endpoint = "api/v3/friends"
+        additional_endpoint_data = f"?PageNumber={page}"
+        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params={"PageNumber": page}, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)}).json()
+
     def get_inbox_messages(self, page=1):
         endpoint = "api/v3/messages/inbox"
         additional_endpoint_data = f"?PageNumber={page}"
