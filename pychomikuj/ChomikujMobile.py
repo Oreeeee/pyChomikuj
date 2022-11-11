@@ -129,34 +129,48 @@ class ChomikujMobile:
         self.get_account_balance()
         return get_download_url_request.json()["FileUrl"]
 
-    def query(self, query_field, page_number=1, media_type="All", extension=None):
+    def query(self, query_field, page=1, media_type="All", extension=None):
         endpoint = "api/v3/files/search"
 
         query_for_hash = f"{urllib.parse.quote(query_field)}".replace(
             "%20", "+")
         if media_type == "Chomiki":
-            additional_endpoint_data = f"?Query={query_for_hash}&PageNumber={page_number}"
+            additional_endpoint_data = f"?Query={query_for_hash}&PageNumber={page}"
             params = {
                 "Query": query_field,
-                "PageNumber": str(page_number)
+                "PageNumber": str(page)
             }
         elif extension != None:
-            additional_endpoint_data = f"?Extension={extension}&Query={query_for_hash}&PageNumber={page_number}&MediaType={media_type}"
+            additional_endpoint_data = f"?Extension={extension}&Query={query_for_hash}&PageNumber={page}&MediaType={media_type}"
             params = {
                 "Extension": extension,
                 "Query": query_field,
-                "PageNumber": str(page_number),
+                "PageNumber": str(page),
                 "MediaType": media_type
             }
         else:
-            additional_endpoint_data = f"?Query={query_for_hash}&PageNumber={page_number}&MediaType={media_type}"
+            additional_endpoint_data = f"?Query={query_for_hash}&PageNumber={page}&MediaType={media_type}"
             params = {
                 "Query": query_field,
-                "PageNumber": str(page_number),
+                "PageNumber": str(page),
                 "MediaType": media_type
             }
 
         return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params=params, headers={"Token": self.__hash_token(f"{endpoint}", additional_endpoint_data)}).json()
+
+    def get_inbox_messages(self, page=1):
+        endpoint = "api/v3/messages/inbox"
+        additional_endpoint_data = f"?PageNumber={page}"
+        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params={"PageNumber": page}, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)}).json()
+
+    def get_outbox_messages(self, page=1):
+        endpoint = "api/v3/messages/outbox"
+        additional_endpoint_data = f"?PageNumber={page}"
+        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params={"PageNumber": page}, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)}).json()
+
+    def mark_all_messages_as_read(self):
+        endpoint = "api/v3/messages/markAllAsRead"
+        self.req_ses.post(f"{self.API_LOCATION}{endpoint}")
 
     def __hash_token(self, endpoint, additional_endpoint_data=None):
         if additional_endpoint_data == None:
