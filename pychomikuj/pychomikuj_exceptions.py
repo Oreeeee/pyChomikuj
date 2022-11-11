@@ -12,3 +12,15 @@ class PasswordProtectedDirectoryException(Exception):
 
 class IncorrectDirectoryPasswordException(Exception):
     pass
+
+
+class FileInPasswordProtectedDirOrNotFoundException(Exception):
+    pass
+
+
+class FileIsADirectoryException(Exception):
+    pass
+
+
+class NotEnoughTransferException(Exception):
+    pass

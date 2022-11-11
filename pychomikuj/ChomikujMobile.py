@@ -114,6 +114,25 @@ class ChomikujMobile:
             raise IncorrectDirectoryPasswordException(
                 "Password to this directory is incorrect")
 
+    def get_download_url(self, file_id):
+        endpoint = "api/v3/files/download"
+
+        additional_endpoint_data = f"?FileId={file_id}"
+
+        get_download_url_request = self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params={
+                                                    "FileId": file_id}, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)})
+
+        if get_download_url_request.status_code == 404:
+            raise FileInPasswordProtectedDirOrNotFoundException(
+                "File is either in password protected directory or not found")
+        if get_download_url_request.json()["Code"] == 604:
+            raise FileIsADirectoryException("This file is a directory")
+        if get_download_url_request.json()["Code"] == 605:
+            raise NotEnoughTransferException
+
+        self.get_account_balance()
+        return get_download_url_request.json()["FileUrl"]
+
     def query(self, query_field, page_number=1, media_type="All", extension=None):
         endpoint = "api/v3/files/search"
 
