@@ -43,13 +43,8 @@ class ChomikujMobile:
         }, headers={"token": self.__hash_token(f"{endpoint}", additional_endpoint_data)})
 
         # Check are login info correct
-        if login_request.status_code != 200:
-            if login_request.status_code == 403:
-                raise IncorrectChomikPasswordException(
-                    "Login info provided was incorrect")
-            else:
-                raise UnknownChomikErrorException(
-                    f"Unknown error! Status code: {login_request.status_code}")
+        if login_request.status_code == 403:
+            raise IncorrectChomikPasswordException(username)
 
         # Update variables
         # Reassign API key
@@ -112,7 +107,7 @@ class ChomikujMobile:
 
         if unlock_directory_request.status_code == 401:
             raise IncorrectDirectoryPasswordException(
-                "Password to this directory is incorrect")
+                folder_id)
 
     def get_download_url(self, file_id):
         endpoint = "api/v3/files/download"
@@ -124,11 +119,12 @@ class ChomikujMobile:
 
         if get_download_url_request.status_code == 404:
             raise FileInPasswordProtectedDirOrNotFoundException(
-                "File is either in password protected directory or not found")
+                file_id)
         if get_download_url_request.json()["Code"] == 604:
-            raise FileIsADirectoryException("This file is a directory")
+            raise FileIsADirectoryException(file_id)
         if get_download_url_request.json()["Code"] == 605:
-            raise NotEnoughTransferException
+            raise NotEnoughTransferException(
+                f"User Transfer: {self.transfer}. File ID: {file_id}")
 
         self.get_account_balance()
         return get_download_url_request.json()["FileUrl"]
