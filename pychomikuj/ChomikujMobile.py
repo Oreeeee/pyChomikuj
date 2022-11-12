@@ -129,6 +129,24 @@ class ChomikujMobile:
         self.get_account_balance()
         return get_download_url_request.json()["FileUrl"]
 
+    def create_directory(self, folder_name, parent_id):
+        endpoint = "api/v3/folders/create"
+        additional_endpoint_data = '{"FolderName":"DIR_NAME","ParentId":"PRNT_ID"}'
+        additional_endpoint_data = additional_endpoint_data.replace(
+            "DIR_NAME", folder_name)
+        additional_endpoint_data = additional_endpoint_data.replace(
+            "PRNT_ID", str(parent_id))
+
+        create_directory_request = self.req_ses.post(f"{self.API_LOCATION}{endpoint}", json={
+            "FolderName": folder_name,
+            "ParentId": str(parent_id)
+        }, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)})
+
+        if create_directory_request.json()["Code"] == 404:
+            raise ParentFolderDoesntExistException(parent_id)
+
+        return create_directory_request.json()["FolderId"]
+
     def query(self, query_field, page=1, media_type="All", extension=None):
         endpoint = "api/v3/files/search"
 

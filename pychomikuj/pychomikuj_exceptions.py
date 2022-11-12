@@ -24,3 +24,7 @@ class FileIsADirectoryException(Exception):
 
 class NotEnoughTransferException(Exception):
     pass
+
+
+class ParentFolderDoesntExistException(Exception):
+    pass
