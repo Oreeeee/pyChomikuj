@@ -30,17 +30,17 @@ class ChomikujMobile:
         # Log into Chomikuj
 
         # Additional data needs to be added for hashing process. This data will be provided
-        additional_endpoint_data = r'{"AccountName":"ACC_NAME","Password":"PASSWD"}'
-        additional_endpoint_data = additional_endpoint_data.replace(
+        dict_data = '{"AccountName":"ACC_NAME","Password":"PASSWD"}'
+        dict_data = dict_data.replace(
             "ACC_NAME", username)
-        additional_endpoint_data = additional_endpoint_data.replace(
+        dict_data = dict_data.replace(
             "PASSWD", password)
 
         endpoint = f'api/v3/account/login'
         login_request = self.req_ses.post(f"{self.API_LOCATION}{endpoint}", json={
             "AccountName": username,
             "Password": password
-        }, headers={"token": self.__hash_token(f"{endpoint}", additional_endpoint_data)})
+        }, headers={"token": self.__hash_token(f"{endpoint}", dict_data=dict_data)})
 
         # Check are login info correct
         if login_request.status_code == 403:
@@ -68,13 +68,11 @@ class ChomikujMobile:
         endpoint = "api/v3/folders"
 
         if account_id == None:
-            additional_endpoint_data = f"?Parent={parent_id}&page={page}"
             params = {
                 "Parent": str(parent_id),
                 "page": str(page)
             }
         else:
-            additional_endpoint_data = f"?AccountId={account_id}&Parent={parent_id}&page={page}"
             params = {
                 "AccountId": str(account_id),
                 "Parent": str(parent_id),
@@ -82,7 +80,7 @@ class ChomikujMobile:
             }
 
         list_directory_request = self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params=params, headers={
-                                                  "Token": self.__hash_token(endpoint, additional_endpoint_data)})
+                                                  "Token": self.__hash_token(endpoint, param_data=params)})
         if list_directory_request.status_code == 401:
             raise PasswordProtectedDirectoryException(
                 "This directory is password protected!")
@@ -91,19 +89,19 @@ class ChomikujMobile:
     def authenticate_password(self, account_id, folder_id, password):
         endpoint = "api/v3/folders/password"
 
-        additional_endpoint_data = r'{"AccountId":"ACC_ID","FolderId":"DIR_ID","Password":"PASSWD"}'
-        additional_endpoint_data = additional_endpoint_data.replace(
+        dict_data = '{"AccountId":"ACC_ID","FolderId":"DIR_ID","Password":"PASSWD"}'
+        dict_data = dict_data.replace(
             "ACC_ID", str(account_id))
-        additional_endpoint_data = additional_endpoint_data.replace(
+        dict_data = dict_data.replace(
             "DIR_ID", str(folder_id))
-        additional_endpoint_data = additional_endpoint_data.replace(
+        dict_data = dict_data.replace(
             "PASSWD", password)
 
         unlock_directory_request = self.req_ses.post(f"{self.API_LOCATION}{endpoint}", json={
             "AccountId": str(account_id),
             "FolderId": str(folder_id),
             "Password": password
-        }, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)})
+        }, headers={"Token": self.__hash_token(endpoint, dict_data=dict_data)})
 
         if unlock_directory_request.status_code == 401:
             raise IncorrectDirectoryPasswordException(
@@ -112,10 +110,12 @@ class ChomikujMobile:
     def get_download_url(self, file_id):
         endpoint = "api/v3/files/download"
 
-        additional_endpoint_data = f"?FileId={file_id}"
+        params = {
+            "FileId": file_id
+        }
 
-        get_download_url_request = self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params={
-                                                    "FileId": file_id}, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)})
+        get_download_url_request = self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params=params, headers={
+                                                    "Token": self.__hash_token(endpoint, param_data=params)})
 
         if get_download_url_request.status_code == 404:
             raise FileInPasswordProtectedDirOrNotFoundException(
@@ -131,16 +131,16 @@ class ChomikujMobile:
 
     def create_directory(self, folder_name, parent_id):
         endpoint = "api/v3/folders/create"
-        additional_endpoint_data = '{"FolderName":"DIR_NAME","ParentId":"PRNT_ID"}'
-        additional_endpoint_data = additional_endpoint_data.replace(
+        dict_data = '{"FolderName":"DIR_NAME","ParentId":"PRNT_ID"}'
+        dict_data = dict_data.replace(
             "DIR_NAME", folder_name)
-        additional_endpoint_data = additional_endpoint_data.replace(
+        dict_data = dict_data.replace(
             "PRNT_ID", str(parent_id))
 
         create_directory_request = self.req_ses.post(f"{self.API_LOCATION}{endpoint}", json={
             "FolderName": folder_name,
             "ParentId": str(parent_id)
-        }, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)})
+        }, headers={"Token": self.__hash_token(endpoint, dict_data)})
 
         if create_directory_request.json()["Code"] == 404:
             raise ParentFolderDoesntExistException(parent_id)
@@ -153,56 +153,75 @@ class ChomikujMobile:
         query_for_hash = f"{urllib.parse.quote(query_field)}".replace(
             "%20", "+")
         if media_type == "Chomiki":
-            additional_endpoint_data = f"?Query={query_for_hash}&PageNumber={page}"
             params = {
                 "Query": query_field,
                 "PageNumber": str(page)
             }
+            manual_param_data = f"?Query={query_for_hash}&PageNumber={page}"
         elif extension != None:
-            additional_endpoint_data = f"?Extension={extension}&Query={query_for_hash}&PageNumber={page}&MediaType={media_type}"
             params = {
                 "Extension": extension,
                 "Query": query_field,
                 "PageNumber": str(page),
                 "MediaType": media_type
             }
+            manual_param_data = f"?Extension={extension}&Query={query_for_hash}&PageNumber={page}&MediaType={media_type}"
         else:
-            additional_endpoint_data = f"?Query={query_for_hash}&PageNumber={page}&MediaType={media_type}"
             params = {
                 "Query": query_field,
                 "PageNumber": str(page),
                 "MediaType": media_type
             }
+            manual_param_data = f"?Query={query_for_hash}&PageNumber={page}&MediaType={media_type}"
 
-        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params=params, headers={"Token": self.__hash_token(f"{endpoint}", additional_endpoint_data)}).json()
+        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params=params, headers={"Token": self.__hash_token(endpoint, manual_data=manual_param_data)}).json()
 
     def get_friend_list(self, page=1):
         endpoint = "api/v3/friends"
-        additional_endpoint_data = f"?PageNumber={page}"
-        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params={"PageNumber": page}, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)}).json()
+        params = {
+            "PageNumber": page
+        }
+        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params=params, headers={"Token": self.__hash_token(endpoint, param_data=params)}).json()
 
     def get_copy_list(self, page=1):
         endpoint = "api/v3/files/copies"
-        additional_endpoint_data = f"?Page={page}"
-        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params={"Page": page}, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)}).json()
+        params = {
+            "Page": page
+        }
+        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params=params, headers={"Token": self.__hash_token(endpoint, param_data=params)}).json()
 
     def get_inbox_messages(self, page=1):
         endpoint = "api/v3/messages/inbox"
-        additional_endpoint_data = f"?PageNumber={page}"
-        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params={"PageNumber": page}, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)}).json()
+        params = {
+            "PageNumber": page
+        }
+        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params=params, headers={"Token": self.__hash_token(endpoint, param_data=params)}).json()
 
     def get_outbox_messages(self, page=1):
         endpoint = "api/v3/messages/outbox"
-        additional_endpoint_data = f"?PageNumber={page}"
-        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params={"PageNumber": page}, headers={"Token": self.__hash_token(endpoint, additional_endpoint_data)}).json()
+        params = {
+            "PageNumber": page
+        }
+        return self.req_ses.get(f"{self.API_LOCATION}{endpoint}", params=params, headers={"Token": self.__hash_token(endpoint, param_data=params)}).json()
 
     def mark_all_messages_as_read(self):
         endpoint = "api/v3/messages/markAllAsRead"
-        self.req_ses.post(f"{self.API_LOCATION}{endpoint}")
+        self.req_ses.post(f"{self.API_LOCATION}{endpoint}", headers={
+                          "Token": self.__hash_token(endpoint)})
 
-    def __hash_token(self, endpoint, additional_endpoint_data=None):
-        if additional_endpoint_data == None:
-            string_to_hash = f"{endpoint}{self.SALT}"
+    def __hash_token(self, endpoint, param_data=None, dict_data=None, manual_data=None):
+        # This function will create a MD5 hash that can be used for Token header in requests
+        if param_data != None:
+            string_to_hash = f"{endpoint}?{urllib.parse.urlencode(param_data)}{self.SALT}"
+        elif dict_data != None:
+            # A dictionary must be a string with a proper format
+            # Example:
+            # dict_data = {"PageNumber":1}
+            # type(dict_data) will be str
+            string_to_hash = f"{endpoint}{dict_data}{self.SALT}"
+        elif manual_data != None:
+            string_to_hash = f"{endpoint}{manual_data}{self.SALT}"
         else:
-            string_to_hash = f"{endpoint}{additional_endpoint_data}{self.SALT}"
+            string_to_hash = f"{endpoint}{self.SALT}"
+
         return hashlib.md5(string_to_hash.encode("UTF-8")).hexdigest()
