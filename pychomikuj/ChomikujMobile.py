@@ -218,6 +218,25 @@ class ChomikujMobile:
             headers={"Token": self.__hash_token(endpoint, param_data=params)},
         ).json()
 
+    def send_message(self, user_id, body, subject):
+        # BROKEN AT THE MOMENT!
+        endpoint = "api/v3/messages/send"
+        dict_data = '{"Subject":"SBJCT","Body":"BDY","AccountTo":"ACC_TO"}'
+        dict_data = dict_data.replace("SBJCT", subject)
+        dict_data = dict_data.replace("BDY", rf"{body}")
+        dict_data = dict_data.replace("ACC_TO", str(user_id))
+        dict_data = dict_data.encode("unicode_escape").decode()
+
+        print(dict_data)
+
+        send_message_request = self.req_ses.post(
+            f"{self.API_LOCATION}{endpoint}",
+            json={"AccountTo": str(user_id), "Body": body, "Subject": subject},
+            headers={"Token": self.__hash_token(endpoint, dict_data=dict_data)},
+        )
+        print(send_message_request.status_code)
+        print(send_message_request.text)
+
     def mark_all_messages_as_read(self):
         endpoint = "api/v3/messages/markAllAsRead"
         self.req_ses.post(
