@@ -26,7 +26,7 @@ This project is in very early development, here is a list of features that work 
 - [x] Getting a list of copied files
 - [ ] Uploading files
 - [ ] Deleting files
-- [ ] Messaging people
+- [x] Messaging people --- FOR SOME UNKNOWN REASON BROKEN AT THE MOMENT
 - [ ] Adding someone as a friend
 2. Windows API
 - Nothing
