@@ -1,6 +1,6 @@
 [project]
 name="pychomikuj"
-version="0.4"
+version="0.5"
 description="Unofficial Chomikuj.pl API written in Python"
 readme="README.md"
 license={file="LICENSE.txt"}

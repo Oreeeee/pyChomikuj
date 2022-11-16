@@ -35,4 +35,5 @@ This project is in very early development, here is a list of features that work 
 
 ## Additional plans
 1. Mobile API
-- [x] Recursively get download links
+- [ ] Recursively get download links
+- [ ] Better logging
