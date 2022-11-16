@@ -332,7 +332,7 @@ class ChomikujMobile:
             f"{self.API_LOCATION}{endpoint}",
             headers={"Token": self.__hash_token(endpoint)},
         )
-
+        
     def __hash_token(self, endpoint, param_data=None, dict_data=None, manual_data=None):
         # This function will create a MD5 hash that can be used for Token header in requests
         if param_data != None:
