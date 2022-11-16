@@ -1,5 +1,5 @@
 # pyChomikuj
-![python](https://img.shields.io/pypi/pyversions/pychomikuj?style=plastic) ![open issues](https://img.shields.io/github/issues-raw/Oreeeee/pychomikuj?style=plastic) ![open pull requests](https://img.shields.io/github/issues-pr/Oreeeee/pychomikuj?style=plastic) ![version](https://img.shields.io/pypi/v/pychomikuj?style=plastic) ![star count](https://img.shields.io/github/stars/Oreeeee/pychomikuj?style=social)
+![python](https://img.shields.io/pypi/pyversions/pychomikuj?style=plastic) ![open issues](https://img.shields.io/github/issues-raw/Oreeeee/pychomikuj?style=plastic) ![open pull requests](https://img.shields.io/github/issues-pr/Oreeeee/pychomikuj?style=plastic) ![version](https://img.shields.io/pypi/v/pychomikuj?style=plastic) ![code style](https://img.shields.io/badge/code%20style-black-black?style=plastic) ![star count](https://img.shields.io/github/stars/Oreeeee/pychomikuj?style=social)
 
 (W.I.P) Chomikuj API written in Python
 
