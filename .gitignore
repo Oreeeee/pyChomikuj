@@ -8,3 +8,5 @@ dist/
 # venv
 .venv/
 .python-version
+
+patched_apk_builder/chomikuj_patched.apk
