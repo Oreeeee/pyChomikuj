@@ -65,15 +65,15 @@ class ChomikujMobile:
         self.points = self.account_balance["Points"]
         self.points_available = self.account_balance["PointsAvailable"]
 
-    def list_directory(self, parent_id=0, page=1, account_id=None):
+    def list_directory(self, id=0, page=1, account_id=None):
         endpoint = "api/v3/folders"
 
         if account_id == None:
-            params = {"Parent": str(parent_id), "page": str(page)}
+            params = {"Parent": str(id), "page": str(page)}
         else:
             params = {
                 "AccountId": str(account_id),
-                "Parent": str(parent_id),
+                "Parent": str(id),
                 "page": str(page),
             }
 
