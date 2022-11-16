@@ -1,12 +1,22 @@
+from .set_up_logging import set_up_logging
 from .pychomikuj_exceptions import *
 import urllib.parse
 import requests
+import logging
 import hashlib
 import uuid
 
 
 class ChomikujMobile:
-    def __init__(self, username, password):
+    def __init__(
+        self, username, password, proxy_ip=None, proxy_port=None, logging_level=None
+    ):
+        # Set up logging
+        if logging_level != None:
+            set_up_logging(logging_level)
+
+        logging.debug("Setting up the API")
+
         # Define class properties
         # Server throws Error 500 when default user-agent is provided. UUID is used for unique device fingerprinting, here it's randomly generated.
         self.USER_AGENT = f"android/3.61 ({uuid.uuid4()}; Google Pixel 6)"
@@ -23,7 +33,16 @@ class ChomikujMobile:
         self.api_key = "0"
 
         # Initialize requests session
+        logging.debug(
+            f"Initializing requests session proxy_ip={proxy_ip} proxy_port={proxy_port}"
+        )
+
         self.req_ses = requests.Session()
+        if proxy_port and proxy_ip != None:
+            self.req_ses.proxies = {
+                "http": f"http://{proxy_ip}:{proxy_port}",
+                "https": f"http://{proxy_ip}:{proxy_port}",
+            }
         self.req_ses.headers["User-Agent"] = self.USER_AGENT
         self.req_ses.headers["api-key"] = self.api_key
 
@@ -34,7 +53,10 @@ class ChomikujMobile:
         dict_data = dict_data.replace("ACC_NAME", username)
         dict_data = dict_data.replace("PASSWD", password)
 
+        logging.info(f"Logging in as {username}")
+
         endpoint = f"api/v3/account/login"
+        logging.debug(f"Using endpoint {endpoint} to log in")
         login_request = self.req_ses.post(
             f"{self.API_LOCATION}{endpoint}",
             json={"AccountName": username, "Password": password},
@@ -44,6 +66,8 @@ class ChomikujMobile:
         # Check are login info correct
         if login_request.status_code == 403:
             raise IncorrectChomikPasswordException(username)
+
+        logging.info(f"Logged in successfully as {username}")
 
         # Update variables
         # Reassign API key
@@ -55,6 +79,8 @@ class ChomikujMobile:
 
     def get_account_balance(self):
         endpoint = "api/v3/account/info"
+
+        logging.debug(f"Executing get_account_balance(). Endpoint={endpoint}")
 
         self.account_balance = self.req_ses.get(
             f"{self.API_LOCATION}{endpoint}",
@@ -77,6 +103,10 @@ class ChomikujMobile:
                 "page": str(page),
             }
 
+        logging.debug(
+            f"Executing list_directory(). Endpoint={endpoint} param_data={params}"
+        )
+
         list_directory_request = self.req_ses.get(
             f"{self.API_LOCATION}{endpoint}",
             params=params,
@@ -86,6 +116,7 @@ class ChomikujMobile:
             raise PasswordProtectedDirectoryException(
                 "This directory is password protected!"
             )
+
         return list_directory_request.json()
 
     def authenticate_password(self, account_id, folder_id, password):
@@ -95,6 +126,10 @@ class ChomikujMobile:
         dict_data = dict_data.replace("ACC_ID", str(account_id))
         dict_data = dict_data.replace("DIR_ID", str(folder_id))
         dict_data = dict_data.replace("PASSWD", password)
+
+        logging.debug(
+            f"Executing authenticate_password(). Endpoint={endpoint} dict_data={dict_data}"
+        )
 
         unlock_directory_request = self.req_ses.post(
             f"{self.API_LOCATION}{endpoint}",
@@ -113,6 +148,10 @@ class ChomikujMobile:
         endpoint = "api/v3/files/download"
 
         params = {"FileId": file_id}
+
+        logging.debug(
+            f"Executing get_download_url(). Endpoint={endpoint} param_data={params}"
+        )
 
         get_download_url_request = self.req_ses.get(
             f"{self.API_LOCATION}{endpoint}",
@@ -138,6 +177,10 @@ class ChomikujMobile:
         dict_data = dict_data.replace("DIR_NAME", folder_name)
         dict_data = dict_data.replace("PRNT_ID", str(parent_id))
 
+        logging.debug(
+            f"Executing create_directory(). Endpoint={endpoint} dict_data={dict_data}"
+        )
+
         create_directory_request = self.req_ses.post(
             f"{self.API_LOCATION}{endpoint}",
             json={"FolderName": folder_name, "ParentId": str(parent_id)},
@@ -154,6 +197,10 @@ class ChomikujMobile:
         dict_data = '{"Files":FLS,"Folders":FLDRS}'
         dict_data = dict_data.replace("FLS", str(files).replace(" ", ""))
         dict_data = dict_data.replace("FLDRS", str(folders).replace(" ", ""))
+
+        logging.debug(
+            f"Executing delete_file(). Endpoint={endpoint} dict_data={dict_data}"
+        )
 
         delete_file_request = self.req_ses.post(
             f"{self.API_LOCATION}{endpoint}",
@@ -189,6 +236,10 @@ class ChomikujMobile:
                 f"?Query={query_for_hash}&PageNumber={page}&MediaType={media_type}"
             )
 
+        logging.debug(
+            f"Executing query(). Endpoint={endpoint} query_for_hash={query_for_hash} param_data={params}"
+        )
+
         return self.req_ses.get(
             f"{self.API_LOCATION}{endpoint}",
             params=params,
@@ -200,6 +251,11 @@ class ChomikujMobile:
     def get_friend_list(self, page=1):
         endpoint = "api/v3/friends"
         params = {"PageNumber": page}
+
+        logging.debug(
+            f"Executing get_friend_list(). Endpoint={endpoint} param_data={params}"
+        )
+
         return self.req_ses.get(
             f"{self.API_LOCATION}{endpoint}",
             params=params,
@@ -209,6 +265,11 @@ class ChomikujMobile:
     def get_copy_list(self, page=1):
         endpoint = "api/v3/files/copies"
         params = {"Page": page}
+
+        logging.debug(
+            f"Executing get_copy_list(). Endpoint={endpoint} param_data={params}"
+        )
+
         return self.req_ses.get(
             f"{self.API_LOCATION}{endpoint}",
             params=params,
@@ -218,6 +279,11 @@ class ChomikujMobile:
     def get_inbox_messages(self, page=1):
         endpoint = "api/v3/messages/inbox"
         params = {"PageNumber": page}
+
+        logging.debug(
+            f"Executing get_inbox_messages(). Endpoint={endpoint} param_data={params}"
+        )
+
         return self.req_ses.get(
             f"{self.API_LOCATION}{endpoint}",
             params=params,
@@ -227,6 +293,11 @@ class ChomikujMobile:
     def get_outbox_messages(self, page=1):
         endpoint = "api/v3/messages/outbox"
         params = {"PageNumber": page}
+
+        logging.debug(
+            f"Executing get_outbox_messages(). Endpoint={endpoint} param_data={params}"
+        )
+
         return self.req_ses.get(
             f"{self.API_LOCATION}{endpoint}",
             params=params,
@@ -254,6 +325,9 @@ class ChomikujMobile:
 
     def mark_all_messages_as_read(self):
         endpoint = "api/v3/messages/markAllAsRead"
+
+        logging.debug(f"Executing mark_all_messages_as_read(). Endpoint={endpoint}")
+
         self.req_ses.post(
             f"{self.API_LOCATION}{endpoint}",
             headers={"Token": self.__hash_token(endpoint)},
@@ -276,4 +350,10 @@ class ChomikujMobile:
         else:
             string_to_hash = f"{endpoint}{self.SALT}"
 
-        return hashlib.md5(string_to_hash.encode("UTF-8")).hexdigest()
+        logging.debug(f"Hashing token {string_to_hash}.")
+
+        hashed_string = hashlib.md5(string_to_hash.encode("UTF-8")).hexdigest()
+
+        logging.debug(f"Hashed token to {string_to_hash} - {hashed_string}")
+
+        return hashed_string
