@@ -28,3 +28,7 @@ class NotEnoughTransferException(Exception):
 
 class ParentFolderDoesntExistException(Exception):
     pass
+
+
+class CannotDeleteFileException(Exception):
+    pass

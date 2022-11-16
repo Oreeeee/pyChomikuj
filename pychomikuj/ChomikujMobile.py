@@ -141,13 +141,28 @@ class ChomikujMobile:
         create_directory_request = self.req_ses.post(
             f"{self.API_LOCATION}{endpoint}",
             json={"FolderName": folder_name, "ParentId": str(parent_id)},
-            headers={"Token": self.__hash_token(endpoint, dict_data)},
+            headers={"Token": self.__hash_token(endpoint, dict_data=dict_data)},
         )
 
         if create_directory_request.json()["Code"] == 404:
             raise ParentFolderDoesntExistException(parent_id)
 
         return create_directory_request.json()["FolderId"]
+
+    def delete_file(self, files=[], folders=[]):
+        endpoint = "api/v3/files/delete"
+        dict_data = '{"Files":FLS,"Folders":FLDRS}'
+        dict_data = dict_data.replace("FLS", str(files).replace(" ", ""))
+        dict_data = dict_data.replace("FLDRS", str(folders).replace(" ", ""))
+
+        delete_file_request = self.req_ses.post(
+            f"{self.API_LOCATION}{endpoint}",
+            json={"Files": files, "Folders": folders},
+            headers={"Token": self.__hash_token(endpoint, dict_data=dict_data)},
+        )
+
+        if delete_file_request.json()["Code"] == 400:
+            raise CannotDeleteFileException(f"{files} {folders}")
 
     def query(self, query_field, page=1, media_type="All", extension=None):
         endpoint = "api/v3/files/search"
