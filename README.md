@@ -32,3 +32,7 @@ This project is in very early development, here is a list of features that work 
 - Nothing
 3. Web API
 - Nothing
+
+## Additional plans
+1. Mobile API
+- [x] Recursively get download links
