@@ -5,6 +5,8 @@ import requests
 import logging
 import hashlib
 import uuid
+import zlib
+import os
 
 
 class ChomikujMobile:
@@ -170,6 +172,44 @@ class ChomikujMobile:
 
         self.get_account_balance()
         return get_download_url_request.json()["FileUrl"]
+
+    def upload_file(self, file_path=None, folder_id=0):
+        endpoint = "api/v3/files/upload/partialUpload"
+
+        dict_data = '{"Name":"FILE_NAME","Size":FILE_SIZE,"FolderId":"FOLDER_ID","Hash":"FILE_HASH"}'
+
+        # Get a CRC32 hash and size of the file
+        # MASSIVE ISSUE !!! - HASHING A LARGE FILE WILL TAKE A LOT OF MEMORY
+        # CURRENT APPROACH HAS TO LOAD THE ENTIRE FILE IN MEMORY
+        # TODO: FIX THAT
+        with open(file_path, "rb") as f:
+            file_hash = hex(zlib.crc32(f.read()) & 0xffffffff)[2:]
+            file_size = len(f.read())
+
+        # Get the filename of the file
+        file_name = os.path.basename(file_path)
+
+        dict_data = dict_data.replace("FILE_NAME", file_name)
+        dict_data = dict_data.replace("FILE_SIZE", str(file_size))
+        dict_data = dict_data.replace("FOLDER_ID", str(folder_id))
+        dict_data = dict_data.replace("FILE_HASH", str(file_hash))
+
+        # Initialize the upload
+        # TODO: Fix the token
+        upload_file_request = self.req_ses.post(f"{self.API_LOCATION}{endpoint}", json={
+            "FolderId": str(folder_id),
+            "Hash": str(file_hash),
+            "Name": file_name,
+            "Size": file_size
+        }, headers={"Token": self.__hash_token(endpoint, dict_data=dict_data)})
+
+        upload_url = upload_file_request.json()["Url"]
+
+        self.partial_file_upload(file_name=file_name, upload_url=upload_url)
+        print(upload_url)
+
+    def partial_file_upload(self, file_name, upload_url):
+        pass # TODO
 
     def create_directory(self, folder_name, parent_id):
         endpoint = "api/v3/folders/create"
