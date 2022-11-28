@@ -1,6 +1,7 @@
 from .set_up_logging import set_up_logging
 from .pychomikuj_exceptions import *
 import urllib.parse
+import collections
 import requests
 import logging
 import hashlib
@@ -178,13 +179,12 @@ class ChomikujMobile:
 
         dict_data = '{"Name":"FILE_NAME","Size":FILE_SIZE,"FolderId":"FOLDER_ID","Hash":"FILE_HASH"}'
 
-        # Get a CRC32 hash and size of the file
-        # MASSIVE ISSUE !!! - HASHING A LARGE FILE WILL TAKE A LOT OF MEMORY
-        # CURRENT APPROACH HAS TO LOAD THE ENTIRE FILE IN MEMORY
-        # TODO: FIX THAT
+        # Get a CRC32 hash
         with open(file_path, "rb") as f:
-            file_hash = hex(zlib.crc32(f.read()) & 0xffffffff)[2:]
-            file_size = len(f.read())
+            file_hash = hex(zlib.crc32(f.read()) & 0xFFFFFFFF)[2:]
+
+        # Get file size
+        file_size = os.path.getsize(file_path)
 
         # Get the filename of the file
         file_name = os.path.basename(file_path)
@@ -196,12 +196,18 @@ class ChomikujMobile:
 
         # Initialize the upload
         # TODO: Fix the token
-        upload_file_request = self.req_ses.post(f"{self.API_LOCATION}{endpoint}", json={
-            "FolderId": str(folder_id),
-            "Hash": str(file_hash),
-            "Name": file_name,
-            "Size": file_size
-        }, headers={"Token": self.__hash_token(endpoint, dict_data=dict_data)})
+        # Please help
+        # I seriously don't know how to fix it
+        upload_file_request = self.req_ses.post(
+            f"{self.API_LOCATION}{endpoint}",
+            json={
+                "FolderId": str(folder_id),
+                "Hash": str(file_hash),
+                "Name": file_name,
+                "Size": file_size,
+            },
+            headers={"Token": self.__hash_token(endpoint, dict_data=dict_data)},
+        )
 
         upload_url = upload_file_request.json()["Url"]
 
@@ -209,7 +215,7 @@ class ChomikujMobile:
         print(upload_url)
 
     def partial_file_upload(self, file_name, upload_url):
-        pass # TODO
+        pass  # TODO
 
     def create_directory(self, folder_name, parent_id):
         endpoint = "api/v3/folders/create"
@@ -372,7 +378,7 @@ class ChomikujMobile:
             f"{self.API_LOCATION}{endpoint}",
             headers={"Token": self.__hash_token(endpoint)},
         )
-        
+
     def __hash_token(self, endpoint, param_data=None, dict_data=None, manual_data=None):
         # This function will create a MD5 hash that can be used for Token header in requests
         if param_data != None:
