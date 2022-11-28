@@ -257,7 +257,7 @@ class ChomikujMobile:
         if delete_file_request.json()["Code"] == 400:
             raise CannotDeleteFileException(f"{files} {folders}")
 
-    def query(self, query_field, page=1, media_type="All", extension=None):
+    def query(self, query_field, page=1, media_type="All", extension=None, size=None):
         endpoint = "api/v3/files/search"
 
         query_for_hash = f"{urllib.parse.quote(query_field)}".replace("%20", "+")
@@ -281,6 +281,14 @@ class ChomikujMobile:
             manual_param_data = (
                 f"?Query={query_for_hash}&PageNumber={page}&MediaType={media_type}"
             )
+
+        if size != None:
+            # Append sizes to params
+            params["SizeMin"] = size[0]
+            params["SizeMax"] = size[1]
+
+            # Append sizes to manual_param_data
+            manual_param_data += f"&SizeMin={size[0]}&SizeMax={size[1]}"
 
         logging.debug(
             f"Executing query(). Endpoint={endpoint} query_for_hash={query_for_hash} param_data={params}"
