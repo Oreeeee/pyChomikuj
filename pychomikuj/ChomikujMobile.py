@@ -10,9 +10,7 @@ import os
 
 
 class ChomikujMobile:
-    def __init__(
-        self, username, password, proxy_ip=None, proxy_port=None
-    ):
+    def __init__(self, username, password, proxy_ip=None, proxy_port=None):
         logging.debug("Setting up the API")
 
         # Define class properties
@@ -21,14 +19,14 @@ class ChomikujMobile:
         self.API_LOCATION = "https://mobile.chomikuj.pl/"
         self.SALT = "wzrwYua$.DSe8suk!`'2"  # String used by Chomikuj to salt MD5
 
-        self.account_balance = dict()
-        self.transfer = int()
-        self.has_unlimited_transfer = bool()
-        self.points = int()
-        self.points_available = bool()
-        self.account_id = int()
-        self.account_name = str()
-        self.api_key = "0"
+        self.account_balance: dict
+        self.transfer: int
+        self.has_unlimited_transfer: bool
+        self.points: int
+        self.points_available: bool
+        self.account_id: int
+        self.account_name: str
+        self.api_key: str = "0"
 
         # Initialize requests session
         logging.debug(
