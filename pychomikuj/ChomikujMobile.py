@@ -1,4 +1,3 @@
-from .set_up_logging import set_up_logging
 from .pychomikuj_exceptions import *
 import urllib.parse
 import collections
