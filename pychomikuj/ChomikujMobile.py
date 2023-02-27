@@ -12,12 +12,8 @@ import os
 
 class ChomikujMobile:
     def __init__(
-        self, username, password, proxy_ip=None, proxy_port=None, logging_level=None
+        self, username, password, proxy_ip=None, proxy_port=None
     ):
-        # Set up logging
-        if logging_level != None:
-            set_up_logging(logging_level)
-
         logging.debug("Setting up the API")
 
         # Define class properties

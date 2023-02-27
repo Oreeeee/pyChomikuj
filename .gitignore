@@ -1,6 +1,9 @@
 # Pycache
 __pycache__/
 
+# IDE
+.vscode/
+
 # Build stuff
 pychomikuj.egg-info/
 dist/
