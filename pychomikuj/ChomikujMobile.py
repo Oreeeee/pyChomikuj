@@ -231,7 +231,11 @@ class ChomikujMobile:
 
         return create_directory_request.json()["FolderId"]
 
-    def delete_file(self, files=[], folders=[]):
+    def delete_file(self, files=None, folders=None):
+        if files == None:
+            files = []
+        if folders == None:
+            folders = []
         endpoint = "api/v3/files/delete"
         dict_data = '{"Files":FLS,"Folders":FLDRS}'
         dict_data = dict_data.replace("FLS", str(files).replace(" ", ""))
